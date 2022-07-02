@@ -131,5 +131,7 @@ dmypy.json
 .DS_Store
 
 pypi/coppertop-bones/bones
-
 pypi/coppertop-bones/coppertop
+pypi/coppertop-bones/README.md
+pypi/coppertop-bones/ribs
+pypi/coppertop-bones/dist
