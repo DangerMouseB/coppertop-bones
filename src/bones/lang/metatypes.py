@@ -472,7 +472,10 @@ class BTIntersection(BType):
     _BTIntersectionByTypes = {}
 
     def __new__(cls, *types):
-        if len(types) <= 1: raise TypeError('Must provide at least two types')
+        if len(types) == 0:
+            raise ProgrammerError('No types provided')
+        if len(types) == 1:
+            return types[0]
         types, flags = _sortedIntersectionTypes(types)
         if (instance := cls._BTIntersectionByTypes.get(types, Missing)) is Missing:
             instance = super()._define()
@@ -545,6 +548,7 @@ def _updateFlagsForIntersection(t, flags):
             raise TypeError('Can only have one exclusive in an intersection')
         flags.exclusive = t
 
+_BTVariable = Missing
 def _sortedUnionTypes(types, allowMultipleSchemaVariables):
     flags = _Flags()
     if len(types) == 1:
@@ -555,7 +559,7 @@ def _sortedUnionTypes(types, allowMultipleSchemaVariables):
         if isinstance(t, BTUnion):            # BTUnion is a subclass of BType so this must come before BType
             collated.extend(t.types)
             [_updateFlagsForUnion(e, flags, allowMultipleSchemaVariables) for e in t.types]
-        elif isinstance(t, (BType, type)): #, BTVariable)):
+        elif isinstance(t, (BType, type, _BTVariable)):
             collated.append(t)
             _updateFlagsForUnion(t, flags, allowMultipleSchemaVariables)
         else:
@@ -573,7 +577,7 @@ def _sortedUnionTypes(types, allowMultipleSchemaVariables):
         answer = collated
     else:
         answer = [collated[0]]                  # add the first
-        for i in range(1, len(collated)):       # for each from the second to the last, if it is differnt to the prior add it
+        for i in range(1, len(collated)):       # from the second to the last, if each is different to the prior add it
             if collated[i] != collated[i-1]:
                 answer.append(collated[i])
     return tuple(answer), flags
@@ -602,12 +606,10 @@ def _sortedIntersectionTypes(types):
                 else:
                     raise TypeError()
     collated.sort(key=lambda t: t.id if isinstance(t, BType) else hash(t))
-    answer = []
-    for i in range(len(collated) - 1):
-        if collated[i] != collated[i+1]:
+    answer = [collated[0]]  # add the first
+    for i in range(1, len(collated)):  # from the second to the last, if each is different to the prior add it
+        if collated[i] != collated[i - 1]:
             answer.append(collated[i])
-    if collated[-2] != collated[-1]:
-        answer.append(collated[-1])
     return tuple(answer), flags
 
 class _AddStuff(object):
