@@ -53,6 +53,9 @@ class _Context(object):
     def __getattr__(self, name):
         return sys._ContextStack.get(name, [Missing])[-1]
 
+    def __setattr__(self, name, value):
+        sys._ContextStack.get(name, [Missing])[-1] = value
+
 
 @_contextmanager
 def _setContext(*args, **kwargs):
