@@ -42,7 +42,7 @@ from coppertop._singletons import _CoWProxy, _TBC_AND_CONTEXT, CoppertopError
 from bones.core.errors import ProgrammerError, NotYetImplemented, PathNotTested, ErrSite
 from bones.core.sentinels import Missing
 from bones.core.utils import firstKey
-from bones.lang.metatypes import BType, fitsWithin, cacheAndUpdate, BTFn, BTUnion, BTTuple, BTPrimitive
+from bones.lang.metatypes import BType, fitsWithin, cacheAndUpdate, BTFn, BTUnion, BTTuple, BTPrimitive, BTIntersection
 from bones.lang.types import nullary, unary, binary, ternary, rau, void
 from coppertop.types import py
 
@@ -388,7 +388,7 @@ class _MultiDispatcher(_DispatcherBase):
             for dBySig in md.dBySigByNumArgs:
                 for d in dBySig.values():
                     ts.append(d._t)
-            md._t_ = BTUnion(*ts)
+            md._t_ = BTIntersection(*ts)
         return md._t_
 
     def _selectDispatcher(md, callerSig):
