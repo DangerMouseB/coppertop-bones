@@ -67,7 +67,7 @@ class BType(object):
         instance.hasT = False
         instance.orthogonal = False
         instance.explicit = False
-        instance.exclusive = Missing
+        instance.exclusive = Missing        # i.e. tri-state - Missing, True or False
         instance._constructor = Missing
         instance._coercer = Missing
         instance._pp = Missing
@@ -451,6 +451,7 @@ class BTUnion(BType):
 
 class BTSVUnion(BTUnion):
     # Usually T1 + T2 is nonsensical, however for schemas it can make sense
+    # OPEN: handle T1 and T2 in compound types, e.g. txt*T1 + txt*T2
     def __init__(self, *args, **kwargs):
         super().__init__()
 
@@ -477,6 +478,8 @@ class BTIntersection(BType):
         if len(types) == 1:
             return types[0]
         types, flags = _sortedIntersectionTypes(types)
+        if len(types) == 1:
+            return types[0]
         if (instance := cls._BTIntersectionByTypes.get(types, Missing)) is Missing:
             instance = super()._define()
             instance.types = types
@@ -884,7 +887,7 @@ def fitsWithin(a, b, TRACE=False, fittingSigs=False):
                 return (cacheId, True, {b:a}, distance + 0.5)  # exact match must beat wildcard
         elif isinstance(a, BTSchemaVariable):
             if a.base.id == b.base.id:
-                # N1 fitWithin Na
+                # N1 fitsWithin Na
                 return (cacheId, True, tByT, distance)
             else:
                 return (cacheId, False, _, _)
